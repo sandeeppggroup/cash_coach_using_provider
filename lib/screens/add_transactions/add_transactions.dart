@@ -16,6 +16,8 @@ class AddTransaction extends StatefulWidget {
   State<AddTransaction> createState() => _AddTransactionState();
 }
 
+TransactionProvider transactionProvider = TransactionProvider();
+
 class _AddTransactionState extends State<AddTransaction> {
   final _amountController = TextEditingController();
 
@@ -46,17 +48,17 @@ class _AddTransactionState extends State<AddTransaction> {
   // final newValue = CategoryType.income;
   @override
   Widget build(BuildContext context) {
-    return Consumer<TransactionProvider>(
-      builder: (context, value, _) => Scaffold(
-        resizeToAvoidBottomInset: false,
-        appBar: AppBar(
-          backgroundColor: const Color.fromARGB(255, 4, 78, 207),
-          centerTitle: true,
-          title: const Text(
-            'Add Transaction',
-          ),
+    return Scaffold(
+      resizeToAvoidBottomInset: false,
+      appBar: AppBar(
+        backgroundColor: const Color.fromARGB(255, 4, 78, 207),
+        centerTitle: true,
+        title: const Text(
+          'Add Transaction',
         ),
-        body: Padding(
+      ),
+      body: Consumer2<TransactionProvider, CategoryProvider>(
+        builder: (context, transactoinProvider, categoryProvider, _) => Padding(
           padding: const EdgeInsets.all(25.0),
           child: Form(
             key: _formKey,
@@ -161,7 +163,6 @@ class _AddTransactionState extends State<AddTransaction> {
                       value: CategoryType.income,
                       groupValue: _selectedCategoryType,
                       onChanged: (newValue) {
-                        // setState(() {});
                         _selectedCategoryType = CategoryType.income;
                         _categoryID = null;
                       },
@@ -170,9 +171,10 @@ class _AddTransactionState extends State<AddTransaction> {
                       height: MediaQuery.of(context).size.height * .04,
                       child: ElevatedButton(
                         onPressed: () {
-                          // setState(() {});
-                          _selectedCategoryType = CategoryType.income;
-                          _categoryID = null;
+                          setState(() {
+                            _selectedCategoryType = CategoryType.income;
+                            _categoryID = null;
+                          });
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.green,
@@ -187,9 +189,10 @@ class _AddTransactionState extends State<AddTransaction> {
                       height: MediaQuery.of(context).size.height * .04,
                       child: ElevatedButton(
                         onPressed: () {
-                          // setState(() {});
-                          _selectedCategoryType = CategoryType.expense;
-                          _categoryID = null;
+                          setState(() {
+                            _selectedCategoryType = CategoryType.expense;
+                            _categoryID = null;
+                          });
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.red,
@@ -204,9 +207,10 @@ class _AddTransactionState extends State<AddTransaction> {
                       value: CategoryType.expense,
                       groupValue: _selectedCategoryType,
                       onChanged: (newValue) {
-                        // setState(() {});
-                        _selectedCategoryType = CategoryType.expense;
-                        _categoryID = null;
+                        setState(() {
+                          _selectedCategoryType = CategoryType.expense;
+                          _categoryID = null;
+                        });
                       },
                     ),
                   ],
@@ -247,8 +251,9 @@ class _AddTransactionState extends State<AddTransaction> {
                     );
                   }).toList(),
                   onChanged: (selectedValue) {
-                    // setState(() {});
-                    _categoryID = selectedValue;
+                    setState(() {
+                      _categoryID = selectedValue;
+                    });
                   },
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -309,9 +314,10 @@ class _AddTransactionState extends State<AddTransaction> {
       lastDate: DateTime.now(),
     );
     if (picked != null && picked != _selectedDate) {
-      // setState(() {});
-      _selectedDate = picked;
-      _dateController.text = DateFormat('dd-MMM-yyyy').format(_selectedDate!);
+      setState(() {
+        _selectedDate = picked;
+        _dateController.text = DateFormat('dd-MMM-yyyy').format(_selectedDate!);
+      });
     }
   }
 
@@ -374,7 +380,6 @@ class _AddTransactionState extends State<AddTransaction> {
         .addTransaction(model);
     // ignore: use_build_context_synchronously
     Navigator.of(context).pop();
-    // ignore: use_build_context_synchronously
     Provider.of<TransactionProvider>(context, listen: false).refresh();
   }
 }

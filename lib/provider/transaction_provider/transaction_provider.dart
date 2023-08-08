@@ -13,8 +13,14 @@ class TransactionProvider with ChangeNotifier {
   List<TransactionModel> incomeListenable = [];
   List<TransactionModel> expenseListenable = [];
   List<TransactionModel> transationAll = [];
+  DateTime? _selectedDate;
 
-  @override
+  CategoryType? _selectedCategoryType;
+
+  CategoryModel? _selectedCategoryModel;
+
+  String? _categoryID;
+
   Future<void> addTransaction(TransactionModel obj) async {
     final transactionDB =
         await Hive.openBox<TransactionModel>(TRANSACTION_DB_NAME);
@@ -39,11 +45,10 @@ class TransactionProvider with ChangeNotifier {
     list.sort((first, second) => second.date.compareTo(first.date));
     transactionList.clear();
     transactionList.addAll(list);
-    notifyListeners();
     balanceAmount();
+    notifyListeners();
   }
 
-  @override
   Future<List<TransactionModel>> getAllTransaction() async {
     final transactionDB =
         await Hive.openBox<TransactionModel>(TRANSACTION_DB_NAME);
@@ -51,7 +56,6 @@ class TransactionProvider with ChangeNotifier {
     return transactionDB.values.toList();
   }
 
-  @override
   Future<void> deleteTransaction(String id) async {
     final transactionDB =
         await Hive.openBox<TransactionModel>(TRANSACTION_DB_NAME);
@@ -59,7 +63,6 @@ class TransactionProvider with ChangeNotifier {
     refresh();
   }
 
-  @override
   Future<void> editTransaction(TransactionModel model) async {
     final transactionDB =
         await Hive.openBox<TransactionModel>(TRANSACTION_DB_NAME);
@@ -74,6 +77,12 @@ class TransactionProvider with ChangeNotifier {
     transactionList.clear();
     transactionList.addAll(transactionDB.values
         .where((element) => element.discription.contains(text)));
+    notifyListeners();
+  }
+
+  void setSelectedCategoryType(CategoryType categoryType) {
+    _selectedCategoryType = categoryType;
+    _categoryID = null;
     notifyListeners();
   }
 }

@@ -3,8 +3,10 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:money_management/db_functions/transactions/transaction_db.dart';
+import 'package:money_management/provider/transaction_provider/transaction_provider.dart';
 import 'package:money_management/screens/transaction/transactionlist_view.dart';
 import 'package:money_management/search/search.dart';
+import 'package:provider/provider.dart';
 
 import '../../../models/transaction/transaction_model.dart';
 import '../../provider/category_provider/category_provider.dart';
@@ -32,7 +34,8 @@ class _Screen_TransactionState extends State<Screen_Transaction>
     results.value.clear();
     // ignore: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
     results.notifyListeners();
-    results.value = TransactionDB.instance.transactionListNOtifier.value;
+    results.value = Provider.of<TransactionProvider>(context, listen: false)
+        .transactionList;
     // ignore: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
     results.notifyListeners();
     super.initState();
@@ -40,7 +43,8 @@ class _Screen_TransactionState extends State<Screen_Transaction>
     _tabController.addListener(() {
       // results.value.clear();
 
-      results.value = TransactionDB.instance.transactionListNOtifier.value;
+      results.value = Provider.of<TransactionProvider>(context, listen: false)
+          .transactionList;
       // ignore: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
       results.notifyListeners();
       setState(
@@ -97,7 +101,7 @@ class _Screen_TransactionState extends State<Screen_Transaction>
 
   @override
   Widget build(BuildContext context) {
-    TransactionDB.instance.refresh();
+    Provider.of<TransactionProvider>(context, listen: false).refresh();
     categoryProvider.refreshUI();
 
     return Scaffold(
@@ -123,8 +127,7 @@ class _Screen_TransactionState extends State<Screen_Transaction>
         ],
       ),
       backgroundColor: Colors.white,
-      body: ValueListenableBuilder(
-        valueListenable: TransactionDB.instance.transactionListNOtifier,
+      body: Consumer<TransactionProvider>(
         builder: (context, value, child) => ValueListenableBuilder(
           valueListenable: results,
           builder: (context, value, child) => Column(
@@ -225,7 +228,8 @@ class _Screen_TransactionState extends State<Screen_Transaction>
   void filter(newValue) {
     log('filter');
 
-    results.value = TransactionDB.instance.transationAll.value;
+    results.value =
+        Provider.of<TransactionProvider>(context, listen: false).transationAll;
     // ignore: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
     results.notifyListeners();
     setState(
@@ -237,60 +241,60 @@ class _Screen_TransactionState extends State<Screen_Transaction>
     log(dropDownVale.toString(), name: 'filter');
     final DateTime now = DateTime.now();
     if (dropDownVale == 'All') {
-      setState(
-        () {
-          results.value = (_tabController.index == 0
-              ? TransactionDB.instance.transactionListNOtifier.value
-              : _tabController.index == 1
-                  ? TransactionDB().incomeListenable.value
-                  : TransactionDB().expenseListenable.value);
-          // ignore: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
-          results.notifyListeners();
-        },
-      );
+      // setState(() {});
+      results.value = (_tabController.index == 0
+          ? Provider.of<TransactionProvider>(context, listen: false)
+              .transactionList
+          : _tabController.index == 1
+              ? Provider.of<TransactionProvider>(context, listen: false)
+                  .incomeListenable
+              : Provider.of<TransactionProvider>(context, listen: false)
+                  .expenseListenable);
+      // ignore: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
+      results.notifyListeners();
       // ignore: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
       results.notifyListeners();
       log(_tabController.index.toString(), name: 'filter_tabe');
     } else if (dropDownVale == 'today') {
       results.value.clear();
       log(dropDownVale);
-      setState(
-        () {
-          results.value = (_tabController.index == 0
-                  ? TransactionDB.instance.transactionListNOtifier.value
-                  : _tabController.index == 1
-                      ? TransactionDB().incomeListenable.value
-                      : TransactionDB().expenseListenable.value)
-              .where((element) => parseDate(element.date)
-                  .toLowerCase()
-                  .contains(parseDate(DateTime.now()).toLowerCase()))
-              .toList();
-          // ignore: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
-          results.notifyListeners();
-        },
-      );
+      // setState(() {});
+      results.value = (_tabController.index == 0
+              ? Provider.of<TransactionProvider>(context, listen: false)
+                  .transactionList
+              : _tabController.index == 1
+                  ? Provider.of<TransactionProvider>(context, listen: false)
+                      .incomeListenable
+                  : Provider.of<TransactionProvider>(context, listen: false)
+                      .expenseListenable)
+          .where((element) => parseDate(element.date)
+              .toLowerCase()
+              .contains(parseDate(DateTime.now()).toLowerCase()))
+          .toList();
+      // ignore: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
+      results.notifyListeners();
       // ignore: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
       results.notifyListeners();
       log(_tabController.index.toString(), name: 'filter_tabe');
     } else if (dropDownVale == 'yesterday') {
       results.value.clear();
-      setState(
-        () {
-          DateTime start = DateTime(now.year, now.month, now.day - 1);
-          DateTime end = start.add(const Duration(days: 1));
-          results.value = (_tabController.index == 0
-                  ? TransactionDB.instance.transactionListNOtifier.value
-                  : _tabController.index == 1
-                      ? TransactionDB().incomeListenable.value
-                      : TransactionDB().expenseListenable.value)
-              .where((element) =>
-                  (element.date.isAfter(start) || element.date == start) &&
-                  element.date.isBefore(end))
-              .toList();
-          // ignore: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
-          results.notifyListeners();
-        },
-      );
+      // setState(() {});
+      DateTime start = DateTime(now.year, now.month, now.day - 1);
+      DateTime end = start.add(const Duration(days: 1));
+      results.value = (_tabController.index == 0
+              ? Provider.of<TransactionProvider>(context, listen: false)
+                  .transactionList
+              : _tabController.index == 1
+                  ? Provider.of<TransactionProvider>(context, listen: false)
+                      .incomeListenable
+                  : Provider.of<TransactionProvider>(context, listen: false)
+                      .expenseListenable)
+          .where((element) =>
+              (element.date.isAfter(start) || element.date == start) &&
+              element.date.isBefore(end))
+          .toList();
+      // ignore: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
+      results.notifyListeners();
       // ignore: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
       results.notifyListeners();
       log(_tabController.index.toString(), name: 'filter_tabe');
@@ -298,42 +302,42 @@ class _Screen_TransactionState extends State<Screen_Transaction>
       results.value.clear();
       // ignore: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
       results.notifyListeners();
-      setState(
-        () {
-          DateTime start = DateTime(now.year, now.month, now.day - 6);
-          DateTime end = DateTime(start.year, start.month, start.day + 7);
-          results.value = (_tabController.index == 0
-                  ? TransactionDB.instance.transactionListNOtifier.value
-                  : _tabController.index == 1
-                      ? TransactionDB().incomeListenable.value
-                      : TransactionDB().expenseListenable.value)
-              .where((element) =>
-                  (element.date.isAfter(start) || element.date == start) &&
-                  element.date.isBefore(end))
-              .toList();
-          // ignore: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
-          results.notifyListeners();
-        },
-      );
+      // setState(() {});
+      DateTime start = DateTime(now.year, now.month, now.day - 6);
+      DateTime end = DateTime(start.year, start.month, start.day + 7);
+      results.value = (_tabController.index == 0
+              ? Provider.of<TransactionProvider>(context, listen: false)
+                  .transactionList
+              : _tabController.index == 1
+                  ? Provider.of<TransactionProvider>(context, listen: false)
+                      .incomeListenable
+                  : Provider.of<TransactionProvider>(context, listen: false)
+                      .expenseListenable)
+          .where((element) =>
+              (element.date.isAfter(start) || element.date == start) &&
+              element.date.isBefore(end))
+          .toList();
+      // ignore: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
+      results.notifyListeners();
     } else {
       results.value.clear();
-      setState(
-        () {
-          DateTime start = DateTime(selectedmonth.year, selectedmonth.month, 1);
-          DateTime end = DateTime(start.year, start.month + 1, start.day);
-          results.value = (_tabController.index == 0
-                  ? TransactionDB.instance.transactionListNOtifier.value
-                  : _tabController.index == 1
-                      ? TransactionDB().incomeListenable.value
-                      : TransactionDB().expenseListenable.value)
-              .where((element) =>
-                  (element.date.isAfter(start) || element.date == start) &&
-                  element.date.isBefore(end))
-              .toList();
-          // ignore: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
-          results.notifyListeners();
-        },
-      );
+      // setState(() {});
+      DateTime start = DateTime(selectedmonth.year, selectedmonth.month, 1);
+      DateTime end = DateTime(start.year, start.month + 1, start.day);
+      results.value = (_tabController.index == 0
+              ? Provider.of<TransactionProvider>(context, listen: false)
+                  .transactionList
+              : _tabController.index == 1
+                  ? Provider.of<TransactionProvider>(context, listen: false)
+                      .incomeListenable
+                  : Provider.of<TransactionProvider>(context, listen: false)
+                      .expenseListenable)
+          .where((element) =>
+              (element.date.isAfter(start) || element.date == start) &&
+              element.date.isBefore(end))
+          .toList();
+      // ignore: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
+      results.notifyListeners();
     }
   }
 }

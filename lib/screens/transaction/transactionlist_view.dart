@@ -1,13 +1,16 @@
 import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:iconly/iconly.dart';
 import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
-import 'package:money_management/db_functions/transactions/transaction_db.dart';
 import 'package:money_management/screens/transaction/view_transaction.dart';
+import 'package:provider/provider.dart';
+
 import '../../../models/category/category_model.dart';
 import '../../../models/transaction/transaction_model.dart';
+import '../../provider/transaction_provider/transaction_provider.dart';
 import '../edit_transaction/edit_transaction.dart';
 
 // ignore: prefer_typing_uninitialized_variables
@@ -125,7 +128,9 @@ class _DropdownListState extends State<TransationListView> {
                                         child: const Text('Cancel')),
                                     TextButton(
                                         onPressed: () {
-                                          TransactionDB.instance
+                                          Provider.of<TransactionProvider>(
+                                                  context,
+                                                  listen: false)
                                               .deleteTransaction(value.id!);
                                           Navigator.of(context).pop();
                                         },

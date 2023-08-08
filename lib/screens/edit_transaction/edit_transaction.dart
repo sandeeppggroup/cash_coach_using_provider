@@ -2,10 +2,10 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:money_management/db_functions/transactions/transaction_db.dart';
 import 'package:money_management/models/category/category_model.dart';
 import 'package:money_management/models/transaction/transaction_model.dart';
 import 'package:money_management/provider/category_provider/category_provider.dart';
+import 'package:money_management/provider/transaction_provider/transaction_provider.dart';
 import 'package:provider/provider.dart';
 
 class EditTransaction extends StatefulWidget {
@@ -52,240 +52,243 @@ class _EditTransactionState extends State<EditTransaction> {
   // final newValue = CategoryType.income;
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 4, 78, 207),
-        centerTitle: true,
-        title: const Text(
-          'Edit Transaction',
+    return Consumer<TransactionProvider>(
+      builder: (context, value, child) => Scaffold(
+        resizeToAvoidBottomInset: false,
+        appBar: AppBar(
+          backgroundColor: const Color.fromARGB(255, 4, 78, 207),
+          centerTitle: true,
+          title: const Text(
+            'Edit Transaction',
+          ),
         ),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(25.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(
-                height: MediaQuery.of(context).size.height * 0.06,
-              ),
-
-              // Textformfield for amount *******************************************  1
-              TextFormField(
-                decoration: InputDecoration(
-                  labelText: 'Amount',
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(15)),
+        body: Padding(
+          padding: const EdgeInsets.all(25.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.06,
                 ),
-                controller: _amountController,
-                keyboardType: TextInputType.number,
-                // inputFormatters: <TextInputFormatter>[
-                //   FilteringTextInputFormatter.digitsOnly,
-                // ],
-                onChanged: (value) {
-                  _inputValue == value;
-                },
-                validator: (value) {
-                  if (value!.isEmpty) {
-                    return 'Please enter amount';
-                  }
-                  // Ensure input contains only digits and at most one decimal point
-                  final RegExp regex = RegExp(r'^\d*\.?\d*$');
-                  if (!regex.hasMatch(value)) {
-                    return 'Input must contain only numbers and at most one decimal point';
-                  }
 
-                  // Ensure input is a valid decimal value
-                  if (double.tryParse(value) == null) {
-                    return 'Input must be a valid decimal value';
-                  }
-                  return null;
-                },
-                textInputAction: TextInputAction.done,
-              ),
-              SizedBox(
-                height: MediaQuery.of(context).size.height * 0.025,
-              ),
-
-              // Textformfield for Discription *******************************************   2
-              TextFormField(
-                decoration: InputDecoration(
-                  labelText: 'Discription',
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(15)),
-                ),
-                controller: _discriptionController,
-                keyboardType: TextInputType.text,
-                onChanged: (value) {},
-                validator: (value) {
-                  if (value!.isEmpty) {
-                    return 'Please enter your discription';
-                  }
-                  return null;
-                },
-                textInputAction: TextInputAction.done,
-              ),
-              SizedBox(
-                height: MediaQuery.of(context).size.height * 0.025,
-              ),
-
-              TextFormField(
-                onTap: () {},
-                decoration: InputDecoration(
-                  suffixIcon: IconButton(
-                    onPressed: () {
-                      selectDate(context);
-                    },
-                    icon: const Icon(Icons.calendar_today),
+                // Textformfield for amount *******************************************  1
+                TextFormField(
+                  decoration: InputDecoration(
+                    labelText: 'Amount',
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(15)),
                   ),
-                  labelText: 'Pick your date',
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(15)),
+                  controller: _amountController,
+                  keyboardType: TextInputType.number,
+                  // inputFormatters: <TextInputFormatter>[
+                  //   FilteringTextInputFormatter.digitsOnly,
+                  // ],
+                  onChanged: (value) {
+                    _inputValue == value;
+                  },
+                  validator: (value) {
+                    if (value!.isEmpty) {
+                      return 'Please enter amount';
+                    }
+                    // Ensure input contains only digits and at most one decimal point
+                    final RegExp regex = RegExp(r'^\d*\.?\d*$');
+                    if (!regex.hasMatch(value)) {
+                      return 'Input must contain only numbers and at most one decimal point';
+                    }
+
+                    // Ensure input is a valid decimal value
+                    if (double.tryParse(value) == null) {
+                      return 'Input must be a valid decimal value';
+                    }
+                    return null;
+                  },
+                  textInputAction: TextInputAction.done,
                 ),
-                readOnly: true,
-                controller: _dateController,
-                keyboardType: TextInputType.text,
-                onChanged: (value) {},
-                validator: (value) {
-                  if (value!.isEmpty) {
-                    return 'Please select a date';
-                  }
-                  return null;
-                },
-                textInputAction: TextInputAction.done,
-              ),
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.025,
+                ),
 
-              SizedBox(
-                height: MediaQuery.of(context).size.height * 0.03,
-              ),
-
-              // Radiobutton and elevatedButtons *******************************************
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Radio(
-                    value: CategoryType.income,
-                    groupValue: _selectedCategoryType,
-                    onChanged: (newValue) {
-                      setState(() {
-                        _selectedCategoryType = CategoryType.income;
-                        _categoryID = null;
-                      });
-                    },
+                // Textformfield for Discription *******************************************   2
+                TextFormField(
+                  decoration: InputDecoration(
+                    labelText: 'Discription',
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(15)),
                   ),
-                  SizedBox(
-                    height: MediaQuery.of(context).size.height * 0.04,
-                    child: ElevatedButton(
+                  controller: _discriptionController,
+                  keyboardType: TextInputType.text,
+                  onChanged: (value) {},
+                  validator: (value) {
+                    if (value!.isEmpty) {
+                      return 'Please enter your discription';
+                    }
+                    return null;
+                  },
+                  textInputAction: TextInputAction.done,
+                ),
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.025,
+                ),
+
+                TextFormField(
+                  onTap: () {},
+                  decoration: InputDecoration(
+                    suffixIcon: IconButton(
                       onPressed: () {
+                        selectDate(context);
+                      },
+                      icon: const Icon(Icons.calendar_today),
+                    ),
+                    labelText: 'Pick your date',
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(15)),
+                  ),
+                  readOnly: true,
+                  controller: _dateController,
+                  keyboardType: TextInputType.text,
+                  onChanged: (value) {},
+                  validator: (value) {
+                    if (value!.isEmpty) {
+                      return 'Please select a date';
+                    }
+                    return null;
+                  },
+                  textInputAction: TextInputAction.done,
+                ),
+
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.03,
+                ),
+
+                // Radiobutton and elevatedButtons *******************************************
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Radio(
+                      value: CategoryType.income,
+                      groupValue: _selectedCategoryType,
+                      onChanged: (newValue) {
                         setState(() {
                           _selectedCategoryType = CategoryType.income;
                           _categoryID = null;
                         });
                       },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                      ),
-                      child: const Text('Income'),
                     ),
-                  ),
-                  SizedBox(
-                    height: MediaQuery.of(context).size.height * 0.04,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          _selectedCategoryType = CategoryType.expense;
-                          _categoryID = null;
-                        });
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
+                    SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.04,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          setState(() {
+                            _selectedCategoryType = CategoryType.income;
+                            _categoryID = null;
+                          });
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
                         ),
+                        child: const Text('Income'),
                       ),
-                      child: const Text('Expense'),
                     ),
-                  ),
-                  Radio(
-                    value: CategoryType.expense,
-                    groupValue: _selectedCategoryType,
-                    onChanged: (newValue) {
-                      setState(() {
+                    SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.04,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          setState(() {
+                            _selectedCategoryType = CategoryType.expense;
+                            _categoryID = null;
+                          });
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        ),
+                        child: const Text('Expense'),
+                      ),
+                    ),
+                    Radio(
+                      value: CategoryType.expense,
+                      groupValue: _selectedCategoryType,
+                      onChanged: (newValue) {
+                        // setState(() {});
                         _selectedCategoryType = CategoryType.expense;
                         _categoryID = null;
-                      });
-                    },
-                  ),
-                ],
-              ),
-              SizedBox(
-                height: MediaQuery.of(context).size.height * 0.03,
-              ),
+                      },
+                    ),
+                  ],
+                ),
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.03,
+                ),
 
-              // Textformfield for category *******************************************   4
+                // Textformfield for category *******************************************   4
 
-              DropdownButtonFormField<String>(
-                borderRadius: BorderRadius.circular(20),
-                value: _categoryID,
-                items: (_selectedCategoryType == CategoryType.income
-                        ? Provider.of<CategoryProvider>(context, listen: false)
-                            .incomeCategoryList
-                        : Provider.of<CategoryProvider>(context, listen: false)
-                            .expenseCategoryList)
-                    .map((e) {
-                  return DropdownMenuItem(
-                    value: e.id,
-                    child: Text(e.name),
-                    onTap: () {
-                      _selectedCategoryModel = e;
-                    },
-                  );
-                }).toList(),
-                onChanged: (selectedValue) {
-                  setState(() {
+                DropdownButtonFormField<String>(
+                  borderRadius: BorderRadius.circular(20),
+                  value: _categoryID,
+                  items: (_selectedCategoryType == CategoryType.income
+                          ? Provider.of<CategoryProvider>(context,
+                                  listen: false)
+                              .incomeCategoryList
+                          : Provider.of<CategoryProvider>(context,
+                                  listen: false)
+                              .expenseCategoryList)
+                      .map((e) {
+                    return DropdownMenuItem(
+                      value: e.id,
+                      child: Text(e.name),
+                      onTap: () {
+                        _selectedCategoryModel = e;
+                      },
+                    );
+                  }).toList(),
+                  onChanged: (selectedValue) {
+                    // setState(() {});
                     _categoryID = selectedValue;
-                  });
-                },
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please select a category option';
-                  }
-                  return null;
-                },
-                decoration: InputDecoration(
-                    labelText: 'Select Category',
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(20))),
-              ),
-
-              SizedBox(
-                height: MediaQuery.of(context).size.height * 0.025,
-              ),
-              SizedBox(
-                height: MediaQuery.of(context).size.height * 0.07,
-                width: MediaQuery.of(context).size.width * 0.9,
-                child: ElevatedButton(
-                  onPressed: () {
-                    editTransactionOnclicked();
                   },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromARGB(255, 4, 78, 207),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please select a category option';
+                    }
+                    return null;
+                  },
+                  decoration: InputDecoration(
+                      labelText: 'Select Category',
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20))),
+                ),
+
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.025,
+                ),
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.07,
+                  width: MediaQuery.of(context).size.width * 0.9,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      editTransactionOnclicked();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color.fromARGB(255, 4, 78, 207),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    child: const Text(
+                      'Submit',
+                      style:
+                          TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
                     ),
                   ),
-                  child: const Text(
-                    'Submit',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
-                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -300,10 +303,9 @@ class _EditTransactionState extends State<EditTransaction> {
       lastDate: DateTime.now(),
     );
     if (picked != null && picked != _selectedDate) {
-      setState(() {
-        _selectedDate = picked;
-        _dateController.text = DateFormat('dd-MMM-yyyy').format(_selectedDate!);
-      });
+      // setState(() {});
+      _selectedDate = picked;
+      _dateController.text = DateFormat('dd-MMM-yyyy').format(_selectedDate!);
     }
   }
 
@@ -355,8 +357,10 @@ class _EditTransactionState extends State<EditTransaction> {
         type: _selectedCategoryType!,
         category: _selectedCategoryModel!,
         id: widget.model.id);
-    await TransactionDB.instance.editTransaction(model);
-    TransactionDB.instance.refresh();
+    await Provider.of<TransactionProvider>(context, listen: false)
+        .editTransaction(model);
+    // ignore: use_build_context_synchronously
+    Provider.of<TransactionProvider>(context, listen: false).refresh();
     // ignore: use_build_context_synchronously
     Navigator.of(context).pop();
   }

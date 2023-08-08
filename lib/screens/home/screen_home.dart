@@ -6,15 +6,16 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:iconly/iconly.dart';
 import 'package:intl/intl.dart';
 import 'package:money_management/account/balance.dart';
-import 'package:money_management/db_functions/transactions/transaction_db.dart';
 import 'package:money_management/models/category/category_model.dart';
 import 'package:money_management/models/transaction/transaction_model.dart';
+import 'package:money_management/provider/transaction_provider/transaction_provider.dart';
 import 'package:money_management/screens/drawer_pages/about.dart';
 import 'package:money_management/screens/drawer_pages/privacy_policy.dart';
 import 'package:money_management/screens/drawer_pages/terms.dart';
 import 'package:money_management/screens/edit_transaction/edit_transaction.dart';
 import 'package:money_management/screens/screen_splash/splash_two.dart';
 import 'package:money_management/screens/transaction/screen_transactions.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../provider/category_provider/category_provider.dart';
@@ -36,7 +37,7 @@ class _ScreenHomeState extends State<ScreenHome> {
 
   @override
   Widget build(BuildContext context) {
-    TransactionDB.instance.refresh();
+    Provider.of<TransactionProvider>(context, listen: false).refresh();
 
     balanceAmount();
     categoryProvider.refreshUI();
@@ -429,126 +430,97 @@ class _ScreenHomeState extends State<ScreenHome> {
             ),
           ),
           Expanded(
-            child: ValueListenableBuilder(
-              valueListenable: TransactionDB.instance.transactionListNOtifier,
-              builder: (BuildContext context, List<TransactionModel> newList,
-                  Widget? _) {
-                return ListView.builder(
-                  itemCount: newList.length,
-                  // values
-                  itemBuilder: (BuildContext context, int index) {
-                    final values = newList[index];
-                    log(newList[index].id.toString(), name: 'home list');
-                    return Slidable(
-                      key: Key(values.id.toString()),
-                      startActionPane: ActionPane(
-                        motion: const StretchMotion(),
-                        children: [
-                          SlidableAction(
-                              spacing: 8,
-                              flex: 5,
-                              borderRadius: BorderRadius.circular(40),
-                              backgroundColor: Colors.blue,
-                              foregroundColor: Colors.white,
-                              icon: IconlyLight.edit,
-                              label: 'Edit',
-                              onPressed: (context) {
-                                final model = TransactionModel(
-                                    discription: values.discription,
-                                    amount: values.amount,
-                                    date: values.date,
-                                    category: values.category,
-                                    type: values.type,
-                                    id: values.id);
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            EditTransaction(model: model)));
-                              }),
-                          SlidableAction(
-                            borderRadius: BorderRadius.circular(40),
-                            flex: 4,
+            child: Consumer<TransactionProvider>(
+              builder: (context, newList, child) => ListView.builder(
+                itemCount: newList.transactionList.length,
+                // values
+                itemBuilder: (BuildContext context, int index) {
+                  final values = newList.transactionList[index];
+                  log(newList.transactionList[index].id.toString(),
+                      name: 'home list');
+                  return Slidable(
+                    key: Key(values.id.toString()),
+                    startActionPane: ActionPane(
+                      motion: const StretchMotion(),
+                      children: [
+                        SlidableAction(
                             spacing: 8,
-                            backgroundColor: Colors.pink,
+                            flex: 5,
+                            borderRadius: BorderRadius.circular(40),
+                            backgroundColor: Colors.blue,
                             foregroundColor: Colors.white,
-                            icon: IconlyLight.delete,
-                            label: 'Delete',
+                            icon: IconlyLight.edit,
+                            label: 'Edit',
                             onPressed: (context) {
-                              values.id;
+                              final model = TransactionModel(
+                                  discription: values.discription,
+                                  amount: values.amount,
+                                  date: values.date,
+                                  category: values.category,
+                                  type: values.type,
+                                  id: values.id);
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          EditTransaction(model: model)));
+                            }),
+                        SlidableAction(
+                          borderRadius: BorderRadius.circular(40),
+                          flex: 4,
+                          spacing: 8,
+                          backgroundColor: Colors.pink,
+                          foregroundColor: Colors.white,
+                          icon: IconlyLight.delete,
+                          label: 'Delete',
+                          onPressed: (context) {
+                            values.id;
 
-                              showDialog(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return AlertDialog(
-                                    title: const Text('Delete'),
-                                    content: const Text(
-                                        'Are you sure?Do you want to delete this transaction?'),
-                                    actions: [
-                                      TextButton(
-                                          onPressed: () {
-                                            Navigator.of(context).pop();
-                                          },
-                                          child: const Text('Cancel')),
-                                      TextButton(
-                                          onPressed: () {
-                                            TransactionDB.instance
-                                                .deleteTransaction(values.id!);
-                                            Navigator.of(context).pop();
-                                          },
-                                          child: const Text('Ok'))
-                                    ],
-                                  );
-                                },
-                              );
-                            },
-                          )
-                        ],
-                      ),
-                      child: Padding(
-                        padding:
-                            const EdgeInsets.only(left: 8, right: 8, bottom: 5),
-                        child: SizedBox(
-                          height: MediaQuery.of(context).size.height * 0.09,
-                          child: Card(
-                            color: const Color.fromARGB(255, 4, 78, 207),
-                            elevation: 10,
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30)),
-                            child: Center(
-                              child: ListTile(
-                                title: Padding(
-                                  padding: const EdgeInsets.only(left: 30),
-                                  child: Text(
-                                    ' ${values.category.name}',
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w500,
-                                      color: values.type == CategoryType.income
-                                          ? Colors.white
-                                          : Colors.white,
-                                    ),
-                                  ),
-                                ),
-                                leading: CircleAvatar(
-                                  radius: 28,
-                                  backgroundColor:
-                                      values.type == CategoryType.income
-                                          ? Colors.green
-                                          : Colors.red,
-                                  child: Text(
-                                    parseDateForHomeRecentTransaction(
-                                        values.date),
-                                    style: const TextStyle(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w500,
-                                        color: Colors.white),
-                                  ),
-                                ),
-                                trailing: Text(
-                                  "₹ ${values.amount}",
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: const Text('Delete'),
+                                  content: const Text(
+                                      'Are you sure?Do you want to delete this transaction?'),
+                                  actions: [
+                                    TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: const Text('Cancel')),
+                                    TextButton(
+                                        onPressed: () {
+                                          newList.deleteTransaction(values.id!);
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: const Text('Ok'))
+                                  ],
+                                );
+                              },
+                            );
+                          },
+                        )
+                      ],
+                    ),
+                    child: Padding(
+                      padding:
+                          const EdgeInsets.only(left: 8, right: 8, bottom: 5),
+                      child: SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.09,
+                        child: Card(
+                          color: const Color.fromARGB(255, 4, 78, 207),
+                          elevation: 10,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30)),
+                          child: Center(
+                            child: ListTile(
+                              title: Padding(
+                                padding: const EdgeInsets.only(left: 30),
+                                child: Text(
+                                  ' ${values.category.name}',
                                   style: TextStyle(
-                                    fontSize: 20,
+                                    fontSize: 18,
                                     fontWeight: FontWeight.w500,
                                     color: values.type == CategoryType.income
                                         ? Colors.white
@@ -556,14 +528,39 @@ class _ScreenHomeState extends State<ScreenHome> {
                                   ),
                                 ),
                               ),
+                              leading: CircleAvatar(
+                                radius: 28,
+                                backgroundColor:
+                                    values.type == CategoryType.income
+                                        ? Colors.green
+                                        : Colors.red,
+                                child: Text(
+                                  parseDateForHomeRecentTransaction(
+                                      values.date),
+                                  style: const TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w500,
+                                      color: Colors.white),
+                                ),
+                              ),
+                              trailing: Text(
+                                "₹ ${values.amount}",
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w500,
+                                  color: values.type == CategoryType.income
+                                      ? Colors.white
+                                      : Colors.white,
+                                ),
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    );
-                  },
-                );
-              },
+                    ),
+                  );
+                },
+              ),
             ),
           ),
         ],

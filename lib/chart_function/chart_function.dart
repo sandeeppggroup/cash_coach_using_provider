@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:money_management/db_functions/transactions/transaction_db.dart';
+import 'package:money_management/provider/transaction_provider/transaction_provider.dart';
 
 import '../models/category/category_model.dart';
 import '../models/transaction/transaction_model.dart';
@@ -39,6 +39,8 @@ ValueNotifier<List<TransactionModel>> incomeLastMonthNotifier =
 ValueNotifier<List<TransactionModel>> expenseLastMonthNotifier =
     ValueNotifier([]);
 
+TransactionProvider transactionProvider = TransactionProvider();
+
 String today = DateFormat.yMd().format(
   DateTime.now(),
 );
@@ -49,7 +51,7 @@ String yesterday = DateFormat.yMd().format(
 );
 
 filterFunction() async {
-  final list = await TransactionDB.instance.getAllTransaction();
+  final list = await transactionProvider.getAllTransaction();
   overviewNotifier.value.clear();
   incomeNotifier1.value.clear();
   expenseNotifier1.value.clear();

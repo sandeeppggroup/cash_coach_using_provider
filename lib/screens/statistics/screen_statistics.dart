@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
-import 'package:money_management/db_functions/transactions/transaction_db.dart';
 import 'package:money_management/graph/graph_model.dart';
+import 'package:money_management/provider/transaction_provider/transaction_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
+
 import '../../Account/balance.dart';
 import '../../chart_function/chart_function.dart';
 
@@ -50,7 +52,7 @@ class _Statistics_ScreenState extends State<Statistics_Screen>
 
   @override
   Widget build(BuildContext context) {
-    TransactionDB.instance.refresh();
+    Provider.of<TransactionProvider>(context, listen: false).refresh();
 
     double width = MediaQuery.of(context).size.width;
     double height = MediaQuery.of(context).size.height;

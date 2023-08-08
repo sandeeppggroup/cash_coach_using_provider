@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:iconly/iconly.dart';
 import 'package:intl/intl.dart';
-import 'package:money_management/db_functions/transactions/transaction_db.dart';
 import 'package:money_management/screens/edit_transaction/edit_transaction.dart';
 import 'package:money_management/screens/transaction/view_transaction.dart';
+import 'package:provider/provider.dart';
+
 import '../../models/category/category_model.dart';
 import '../../models/transaction/transaction_model.dart';
+import '../provider/transaction_provider/transaction_provider.dart';
 
 class Search extends StatefulWidget {
   const Search({super.key});
@@ -55,163 +57,158 @@ class _SearchState extends State<Search> {
                       ),
                       focusColor: Colors.white),
                   onChanged: (purpose) {
-                    TransactionDB.instance.search(purpose);
+                    Provider.of<TransactionProvider>(context, listen: false)
+                        .search(purpose);
                   },
                 ),
               ),
             ),
-            ValueListenableBuilder(
-              valueListenable: TransactionDB.instance.transactionListNOtifier,
-              builder: (BuildContext context, List<TransactionModel> newList,
-                  Widget? _) {
-                return Expanded(
-                  child: ListView.separated(
-                    padding: const EdgeInsets.all(10),
-                    itemBuilder: (context, index) {
-                      final value = newList[index];
-                      return GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => View_Transaction(
-                                        amount: value.amount,
-                                        category: value.category.name,
-                                        description: value.discription,
-                                        date: value.date,
-                                      )));
-                        },
-                        child: Slidable(
-                          startActionPane: ActionPane(
-                            motion: const StretchMotion(),
-                            children: [
-                              SlidableAction(
-                                borderRadius: BorderRadius.circular(30),
-                                spacing: 13,
-                                padding: const EdgeInsets.all(8),
-                                backgroundColor: Colors.blue,
-                                foregroundColor: Colors.white,
-                                icon: IconlyLight.edit,
-                                label: 'Edit',
-                                onPressed: (context) {
-                                  final model = TransactionModel(
-                                      discription: value.discription,
+            Consumer<TransactionProvider>(
+              builder: (context, newList, _) => Expanded(
+                child: ListView.separated(
+                  padding: const EdgeInsets.all(10),
+                  itemBuilder: (context, index) {
+                    final value = newList.transactionList[index];
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => View_Transaction(
                                       amount: value.amount,
+                                      category: value.category.name,
+                                      description: value.discription,
                                       date: value.date,
-                                      category: value.category,
-                                      type: value.type,
-                                      id: value.id);
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => EditTransaction(
-                                        model: model,
-                                      ),
+                                    )));
+                      },
+                      child: Slidable(
+                        startActionPane: ActionPane(
+                          motion: const StretchMotion(),
+                          children: [
+                            SlidableAction(
+                              borderRadius: BorderRadius.circular(30),
+                              spacing: 13,
+                              padding: const EdgeInsets.all(8),
+                              backgroundColor: Colors.blue,
+                              foregroundColor: Colors.white,
+                              icon: IconlyLight.edit,
+                              label: 'Edit',
+                              onPressed: (context) {
+                                final model = TransactionModel(
+                                    discription: value.discription,
+                                    amount: value.amount,
+                                    date: value.date,
+                                    category: value.category,
+                                    type: value.type,
+                                    id: value.id);
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => EditTransaction(
+                                      model: model,
                                     ),
-                                  );
-                                },
-                              ),
-                              SlidableAction(
-                                borderRadius: BorderRadius.circular(30),
-                                spacing: 8,
-                                backgroundColor: Colors.pink,
-                                foregroundColor: Colors.white,
-                                icon: IconlyLight.delete,
-                                label: 'Delete',
-                                onPressed: (context) {
-                                  value;
-
-                                  showDialog(
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return AlertDialog(
-                                        title: const Text('Delete'),
-                                        content: const Text(
-                                            'Are you sure!  Do you want to delete this transaction?'),
-                                        actions: [
-                                          TextButton(
-                                              onPressed: () {
-                                                Navigator.of(context).pop();
-                                              },
-                                              child: const Text('Cancel')),
-                                          TextButton(
-                                              onPressed: () {
-                                                TransactionDB.instance
-                                                    .deleteTransaction(
-                                                        value.id!);
-                                                Navigator.of(context).pop();
-                                              },
-                                              child: const Text('Ok'))
-                                        ],
-                                      );
-                                    },
-                                  );
-                                },
-                              )
-                            ],
-                          ),
-                          child: Card(
-                            // elevation: 10,
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30)),
-                            color: const Color.fromARGB(255, 4, 78, 207),
-                            child: ListTile(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              leading: Container(
-                                height:
-                                    MediaQuery.of(context).size.height * 0.06,
-                                width: MediaQuery.of(context).size.width * 0.2,
-                                decoration: BoxDecoration(
-                                    color: value.type == CategoryType.income
-                                        ? Colors.green
-                                        : Colors.red,
-                                    borderRadius: BorderRadius.circular(50)),
-                                child: Center(
-                                  child: Text(
-                                    parseDate(value.date),
-                                    style: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w500,
-                                        color: Colors.white),
                                   ),
-                                ),
-                              ),
-                              title: Padding(
-                                padding: EdgeInsets.only(
-                                    left: MediaQuery.of(context).size.width *
-                                        0.05),
+                                );
+                              },
+                            ),
+                            SlidableAction(
+                              borderRadius: BorderRadius.circular(30),
+                              spacing: 8,
+                              backgroundColor: Colors.pink,
+                              foregroundColor: Colors.white,
+                              icon: IconlyLight.delete,
+                              label: 'Delete',
+                              onPressed: (context) {
+                                value;
+
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                      title: const Text('Delete'),
+                                      content: const Text(
+                                          'Are you sure!  Do you want to delete this transaction?'),
+                                      actions: [
+                                        TextButton(
+                                            onPressed: () {
+                                              Navigator.of(context).pop();
+                                            },
+                                            child: const Text('Cancel')),
+                                        TextButton(
+                                            onPressed: () {
+                                              newList
+                                                  .deleteTransaction(value.id!);
+                                              Navigator.of(context).pop();
+                                            },
+                                            child: const Text('Ok'))
+                                      ],
+                                    );
+                                  },
+                                );
+                              },
+                            )
+                          ],
+                        ),
+                        child: Card(
+                          // elevation: 10,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30)),
+                          color: const Color.fromARGB(255, 4, 78, 207),
+                          child: ListTile(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            leading: Container(
+                              height: MediaQuery.of(context).size.height * 0.06,
+                              width: MediaQuery.of(context).size.width * 0.2,
+                              decoration: BoxDecoration(
+                                  color: value.type == CategoryType.income
+                                      ? Colors.green
+                                      : Colors.red,
+                                  borderRadius: BorderRadius.circular(50)),
+                              child: Center(
                                 child: Text(
-                                  ' ${value.category.name}',
+                                  parseDate(value.date),
                                   style: const TextStyle(
-                                      fontSize: 20,
+                                      fontSize: 16,
                                       fontWeight: FontWeight.w500,
                                       color: Colors.white),
                                 ),
                               ),
-                              trailing: Text(
-                                "₹ ${value.amount}",
+                            ),
+                            title: Padding(
+                              padding: EdgeInsets.only(
+                                  left:
+                                      MediaQuery.of(context).size.width * 0.05),
+                              child: Text(
+                                ' ${value.category.name}',
                                 style: const TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.white,
-                                ),
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.white),
+                              ),
+                            ),
+                            trailing: Text(
+                              "₹ ${value.amount}",
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.white,
                               ),
                             ),
                           ),
                         ),
-                      );
-                    },
-                    separatorBuilder: (context, index) {
-                      return SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.001,
-                      );
-                    },
-                    itemCount: newList.length,
-                  ),
-                );
-              },
+                      ),
+                    );
+                  },
+                  separatorBuilder: (context, index) {
+                    return SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.001,
+                    );
+                  },
+                  itemCount: newList.transactionList.length,
+                ),
+              ),
             ),
           ],
         ),

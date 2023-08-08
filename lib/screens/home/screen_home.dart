@@ -1,5 +1,4 @@
 import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -37,8 +36,9 @@ class _ScreenHomeState extends State<ScreenHome> {
 
   @override
   Widget build(BuildContext context) {
-    Provider.of<TransactionProvider>(context, listen: false).refresh();
-
+    TransactionProvider transactionProvider =
+        Provider.of<TransactionProvider>(context);
+    transactionProvider.refresh();
     balanceAmount();
     categoryProvider.refreshUI();
     return Scaffold(

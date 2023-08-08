@@ -48,6 +48,8 @@ class _AddTransactionState extends State<AddTransaction> {
   // final newValue = CategoryType.income;
   @override
   Widget build(BuildContext context) {
+    CategoryProvider categoryProvider = Provider.of<CategoryProvider>(context);
+    categoryProvider.refreshUI();
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
@@ -171,10 +173,8 @@ class _AddTransactionState extends State<AddTransaction> {
                       height: MediaQuery.of(context).size.height * .04,
                       child: ElevatedButton(
                         onPressed: () {
-                          setState(() {
-                            _selectedCategoryType = CategoryType.income;
-                            _categoryID = null;
-                          });
+                          _selectedCategoryType = CategoryType.income;
+                          _categoryID = null;
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.green,
@@ -189,10 +189,8 @@ class _AddTransactionState extends State<AddTransaction> {
                       height: MediaQuery.of(context).size.height * .04,
                       child: ElevatedButton(
                         onPressed: () {
-                          setState(() {
-                            _selectedCategoryType = CategoryType.expense;
-                            _categoryID = null;
-                          });
+                          _selectedCategoryType = CategoryType.expense;
+                          _categoryID = null;
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.red,
@@ -207,10 +205,8 @@ class _AddTransactionState extends State<AddTransaction> {
                       value: CategoryType.expense,
                       groupValue: _selectedCategoryType,
                       onChanged: (newValue) {
-                        setState(() {
-                          _selectedCategoryType = CategoryType.expense;
-                          _categoryID = null;
-                        });
+                        _selectedCategoryType = CategoryType.expense;
+                        _categoryID = null;
                       },
                     ),
                   ],
@@ -251,9 +247,7 @@ class _AddTransactionState extends State<AddTransaction> {
                     );
                   }).toList(),
                   onChanged: (selectedValue) {
-                    setState(() {
-                      _categoryID = selectedValue;
-                    });
+                    _categoryID = selectedValue;
                   },
                   validator: (value) {
                     if (value == null || value.isEmpty) {

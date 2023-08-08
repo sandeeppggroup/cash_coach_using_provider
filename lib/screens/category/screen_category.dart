@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:money_management/provider/category_provider/category_provider.dart';
 import 'package:money_management/screens/category/expense_category_list.dart';
 import 'package:money_management/screens/category/income_category_list.dart';
+import 'package:provider/provider.dart';
 
 import 'category_add_popup.dart';
 
@@ -12,8 +13,6 @@ class ScreenCategory extends StatefulWidget {
   State<ScreenCategory> createState() => _ScreenCategoryState();
 }
 
-CategoryProvider categoryProvider = CategoryProvider();
-
 class _ScreenCategoryState extends State<ScreenCategory>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
@@ -21,7 +20,7 @@ class _ScreenCategoryState extends State<ScreenCategory>
   @override
   void initState() {
     _tabController = TabController(length: 2, vsync: this);
-    categoryProvider.refreshUI();
+
     super.initState();
   }
 
@@ -33,6 +32,8 @@ class _ScreenCategoryState extends State<ScreenCategory>
 
   @override
   Widget build(BuildContext context) {
+    CategoryProvider categoryProvider = Provider.of<CategoryProvider>(context);
+    categoryProvider.refreshUI();
     return SafeArea(
       child: Card(
         child: Row(

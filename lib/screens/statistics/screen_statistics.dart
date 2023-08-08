@@ -7,6 +7,7 @@ import 'package:syncfusion_flutter_charts/charts.dart';
 
 import '../../Account/balance.dart';
 import '../../chart_function/chart_function.dart';
+import '../../provider/category_provider/category_provider.dart';
 
 // ignore: camel_case_types
 class Statistics_Screen extends StatefulWidget {
@@ -52,7 +53,12 @@ class _Statistics_ScreenState extends State<Statistics_Screen>
 
   @override
   Widget build(BuildContext context) {
-    Provider.of<TransactionProvider>(context, listen: false).refresh();
+    TransactionProvider transactionProvider =
+        Provider.of<TransactionProvider>(context);
+    transactionProvider.refresh();
+
+    CategoryProvider categoryProvider = Provider.of<CategoryProvider>(context);
+    categoryProvider.refreshUI();
 
     double width = MediaQuery.of(context).size.width;
     double height = MediaQuery.of(context).size.height;
